@@ -39,7 +39,7 @@ local template = grafana.template;
 
 
       local podWorkloadColumns = [
-        'count(mixin_pod_workload{%(clusterLabel)s="$cluster"}) by (namespace)' % $._config,
+        'sum(kube_pod_owner{%(clusterLabel)s="$cluster"}) by (namespace)' % $._config,
         'count(avg(mixin_pod_workload{%(clusterLabel)s="$cluster"}) by (workload, namespace)) by (namespace)' % $._config,
       ];
 
@@ -87,7 +87,7 @@ local template = grafana.template;
       g.dashboard(
         '%(dashboardNamePrefix)sCompute Resources / Cluster' % $._config.grafanaK8s,
         uid=($._config.grafanaDashboardIDs['k8s-resources-cluster.json']),
-      ).addTemplate('cluster', 'node_cpu_seconds_total', $._config.clusterLabel, hide=if $._config.showMultiCluster then 0 else 2)
+      )
       .addRow(
         (g.row('Headlines') +
          {

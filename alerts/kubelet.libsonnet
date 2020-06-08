@@ -24,9 +24,8 @@
           },
           {
             expr: |||
-              kube_node_spec_taint{%(kubeStateMetricsSelector)s,key="node.kubernetes.io/unreachable",effect="NoSchedule"} == 1
+              (kube_node_spec_taint{%(kubeStateMetricsSelector)s,key="node.kubernetes.io/unreachable",effect="NoSchedule"} unless ignoring(key,value) kube_node_spec_taint{%(kubeStateMetricsSelector)s,key="ToBeDeletedByClusterAutoscaler"}) == 1
             ||| % $._config,
-            'for': '2m',
             labels: {
               severity: 'warning',
             },
@@ -79,7 +78,7 @@
           {
             alert: 'KubeletPodStartUpLatencyHigh',
             expr: |||
-              histogram_quantile(0.99, sum(rate(kubelet_pod_worker_duration_seconds_bucket{%(kubeletSelector)s}[5m])) by (instance, le)) * on(instance) group_left(node) kubelet_node_name  > 60
+              histogram_quantile(0.99, sum(rate(kubelet_pod_worker_duration_seconds_bucket{%(kubeletSelector)s}[5m])) by (instance, le)) * on(instance) group_left(node) kubelet_node_name{%(kubeletSelector)s} > 60
             ||| % $._config,
             'for': '15m',
             labels: {
